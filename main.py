@@ -75,35 +75,33 @@ def interpreter(filename):
         i = 0 # i to check for "File: " pointer
 
         while s.find("week", i) != -1:
-            
-
             i = s.find("week", i)
-            print(i)
+            print("{:.2f}%".format(i/len(s) * 100))
             iNext = s.find("week", i+5)
             # find the next instance of "find to denote the end of the data stream"
             fName = s[i:s.find("\n", i)]
 
             dStart = s.find("Data:", i) + 6
 
-            data = s[dStart:iNext] # TODO PROCESS THIS DATA STRING
+            data = s[dStart:iNext] if dStart != 5 else []# TODO PROCESS THIS DATA STRING
 
-            num = [int(s) for s in data.split() if s.isdigit()]
-            print(num)
+            num = [int(s) for s in data.split() if s.isdigit()] if data != [] else []
+
+            units = [s for s in unitSet if fuzz.partial_ratio(s, data) > 80]
 
             for p in productSet:
-                if fuzz.partial_ratio(p, data) > 75:
-                    print(p)
+                if fuzz.partial_ratio(p, data) > 80:
                     d = {}
                     d["product_name"] = p
 
+                    d["discount"] = popMax(num)
                     d["unit_promo_price"] = popMax(num)
 
                     d["flyer_name"] = fName.replace(".jpg", "")
 
-                
-                    d["uom"] = ":)"
-                    d["least_unit_for_promo"] = popMax(num)
+                    d["uom"] = popMax(units)
                     d["save_per_unit"] = popMax(num)
+                    d["least_unit_for_promo"] = popMax(num)
 
                     d["discount"] = popMax(num)
                     d["organic"] = 0
