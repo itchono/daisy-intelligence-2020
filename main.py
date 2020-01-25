@@ -40,7 +40,7 @@ def processImage(filename, threshold = None, process = None):
     os.remove(filename)
     return text
 
-if __name__ == "__main__":
+def fileRead():
     data = {}
 
     for f in os.listdir("flyer_images"):
@@ -48,13 +48,55 @@ if __name__ == "__main__":
         print(f)
 
         data[f] = processImage("flyer_images/" + f)
-
-        
-
         print("Done")
 
-    with open("outputTemp.text", "w") as t:
+    with open("outputTemp.txt", "w") as t:
         for f in data:
             t.write(("File: {}\nData:\n{}".format(f, data[f])))
 
+def interpreter(filename):
+
+    l = []
+
+    with open(filename, "r") as f:
+        s = f.read()
+
+        i = 0 # i to check for "File: " pointer
+
+        while s.find("File: ", i) != -1:
+            d = {}
+
+            i = s.find("File: ",i)
+            end = s.find("File: ", i+1)
+            # find the next instance of "find to denote the end of the data stream"
+            fName = s[i+6:s.find("\n", i)]
+
+            dStart = s.find("Data: ", i) + 6
+
+            data = s[dStart:end] # TODO PROCESS THIS DATA STRING
+
+            d["flyer_name"] = fName.replace(".jpg", "")
+
+            d["product_name"] = ":)"
+
+            d["unit_promo_price"] = ":)"
+
+            d["uom"] = ":)"
+            d["least_unit_for_promo"] = ":)"
+            d["unit_promo_price"] = ":)"
+
+            i += 1
+            
+    return d
+
+if __name__ == "__main__":
+
+    data = interpreter("outputTemp.txt")
+    
+    with open("output.csv", "w") as csv:
+        csv.write("flyer_name, product_name, unit_promo_price, uom, least_unit_for_promo, save_per_unit, discount, organic")
+
+        for e in data:
+            csv.write("\n")
+            csv.write("{0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}".format(e["flyer_name"], e["product_name"], e["unit_promo_price"], e["uom"], e["least_unit_for_promo"], e["save_per_unit"], e["discount"], e["organic"]))
     
