@@ -1,4 +1,4 @@
-import fuzzywuzzy
+from fuzzywuzzy import fuzz
 from PIL import Image
 import pytesseract
 import cv2
@@ -6,6 +6,9 @@ import os, os.path
 
 pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
  
+
+productSet = []
+unitSet = []
 
 
 def processImage(filename, threshold = None, process = None):
@@ -54,6 +57,7 @@ def fileRead():
         for f in data:
             t.write(("File: {}\nData:\n{}".format(f, data[f])))
 
+
 def interpreter(filename):
 
     l = []
@@ -63,33 +67,47 @@ def interpreter(filename):
 
         i = 0 # i to check for "File: " pointer
 
-        while s.find("File: ", i) != -1:
-            d = {}
-
-            i = s.find("File: ",i)
-            end = s.find("File: ", i+1)
-            # find the next instance of "find to denote the end of the data stream"
-            fName = s[i+6:s.find("\n", i)]
-
-            dStart = s.find("Data: ", i) + 6
-
-            data = s[dStart:end] # TODO PROCESS THIS DATA STRING
-
-            d["flyer_name"] = fName.replace(".jpg", "")
-
-            d["product_name"] = ":)"
-
-            d["unit_promo_price"] = ":)"
-
-            d["uom"] = ":)"
-            d["least_unit_for_promo"] = ":)"
-            d["unit_promo_price"] = ":)"
-
-            i += 1
+        while s.find("week", i) != -1:
             
-    return d
+
+            i = s.find("week", i)
+            print(i)
+            iNext = s.find("week", i+5)
+            # find the next instance of "find to denote the end of the data stream"
+            fName = s[i:s.find("\n", i)]
+
+            dStart = s.find("Data:", i) + 6
+
+            data = s[dStart:iNext] # TODO PROCESS THIS DATA STRING
+
+            for p in productSet:
+                if fuzz.partial_ratio(p, data) > 75:
+                    print(p)
+                    d = {}
+                    d["product_name"] = p
+                    num = [int(s) for s in data.split() if s.isdigit()]
+                    d["unit_promo_price"] = min(num) if num != [] else 0
+
+                    d["flyer_name"] = fName.replace(".jpg", "")
+
+                
+                    d["uom"] = ":)"
+                    d["least_unit_for_promo"] = ":)"
+                    d["save_per_unit"] = ":)"
+
+                    d["discount"] = ":)"
+                    d["organic"] = ":)"
+
+                    l.append(d)
+
+            i = iNext
+            
+    return l
 
 if __name__ == "__main__":
+
+    with open("product_dictionary.csv", "r") as p:
+        productSet += (p.read().split("\n"))
 
     data = interpreter("outputTemp.txt")
     
