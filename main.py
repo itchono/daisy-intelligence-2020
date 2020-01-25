@@ -57,6 +57,13 @@ def fileRead():
         for f in data:
             t.write(("File: {}\nData:\n{}".format(f, data[f])))
 
+def popMax(arr):
+    if arr != []:
+        k = max(arr)
+        arr.remove(k)
+    else:
+        k = 0
+    return k
 
 def interpreter(filename):
 
@@ -80,23 +87,26 @@ def interpreter(filename):
 
             data = s[dStart:iNext] # TODO PROCESS THIS DATA STRING
 
+            num = [int(s) for s in data.split() if s.isdigit()]
+            print(num)
+
             for p in productSet:
                 if fuzz.partial_ratio(p, data) > 75:
                     print(p)
                     d = {}
                     d["product_name"] = p
-                    num = [int(s) for s in data.split() if s.isdigit()]
-                    d["unit_promo_price"] = min(num) if num != [] else 0
+
+                    d["unit_promo_price"] = popMax(num)
 
                     d["flyer_name"] = fName.replace(".jpg", "")
 
                 
                     d["uom"] = ":)"
-                    d["least_unit_for_promo"] = ":)"
-                    d["save_per_unit"] = ":)"
+                    d["least_unit_for_promo"] = popMax(num)
+                    d["save_per_unit"] = popMax(num)
 
-                    d["discount"] = ":)"
-                    d["organic"] = ":)"
+                    d["discount"] = popMax(num)
+                    d["organic"] = 0
 
                     l.append(d)
 
